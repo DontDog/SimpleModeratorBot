@@ -3,7 +3,7 @@ from aiogram import Router, types
 
 router = Router()
 
-@router.message(lambda message: message.chat.type == "supergroup" and message.text.startswith("!"))
+@router.message(lambda message: message.chat.type == "supergroup" and message.text and message.text.startswith("!"))
 async def register_teacher(message: types.Message):
     full_name = message.text[1:].strip()
     user_id = message.from_user.id

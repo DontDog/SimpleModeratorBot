@@ -1,21 +1,25 @@
 import asyncio
 from aiogram import Dispatcher
-from app.bot import bot
+from app import bot, scheduler
 from aiogram.fsm.storage.memory import MemoryStorage
-from handlers import register_teacher, start, reserve, save
+from handlers import register_teacher, start, reserve, save, set, send_statistics
 
 
-def main():
+async def main():
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
 
     dp.include_router(start.router)
     dp.include_router(save.router)
+    dp.include_router(set.router)
     dp.include_router(register_teacher.router)
     dp.include_router(reserve.router)
 
-    asyncio.run(dp.start_polling(bot))
+    scheduler.add_job(send_statistics, 'cron', hour=17, minute=50, day_of_week='0-5')
+    scheduler.start()
+
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

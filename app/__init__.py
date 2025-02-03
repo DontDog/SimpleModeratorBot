@@ -1,1 +1,1 @@
-from .bot import teachers_db
+from .bot import teachers_db, schedule_db, bot, scheduler

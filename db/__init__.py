@@ -1,1 +1,2 @@
-from .user_db import UserDatabase
+from .user_database import UserDatabase
+from .schedule_database import ScheduleDatabase
