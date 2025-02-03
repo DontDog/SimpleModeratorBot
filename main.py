@@ -1,12 +1,18 @@
 import asyncio
 from aiogram import Dispatcher
 from app.bot import bot
-from handlers import register
+from aiogram.fsm.storage.memory import MemoryStorage
+from handlers import register_teacher, start, reserve, save
 
 
 def main():
-    dp = Dispatcher()
-    dp.include_router(register.router)
+    storage = MemoryStorage()
+    dp = Dispatcher(storage=storage)
+
+    dp.include_router(start.router)
+    dp.include_router(save.router)
+    dp.include_router(register_teacher.router)
+    dp.include_router(reserve.router)
 
     asyncio.run(dp.start_polling(bot))
 
