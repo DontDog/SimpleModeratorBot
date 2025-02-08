@@ -1,9 +1,11 @@
 from app import teachers_db
+from app import flag_registration
 from aiogram import Router, types
 
 router = Router()
 
-@router.message(lambda message: message.chat.type == "supergroup" and message.text and message.text.startswith("!"))
+@router.message(lambda message: message.chat.type == "supergroup" and flag_registration.get()
+                                and message.text and message.text.startswith("!"))
 async def register_teacher(message: types.Message):
     full_name = message.text[1:].strip()
     user_id = message.from_user.id
@@ -16,4 +18,4 @@ async def register_teacher(message: types.Message):
         await message.reply(f'Вы изменили имя с "{d["name"]}", на "{full_name}"')
 
     teachers_db.add_or_update_user(user_id, full_name, user_full_name, user_username)
-    await message.reply(f"Регистрация прошла успешно! {full_name}")
+    await message.reply(f"Регистрация прошла успешно!")

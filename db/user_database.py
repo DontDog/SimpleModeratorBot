@@ -1,6 +1,7 @@
 import csv
 import os
-import datetime
+from datetime import datetime, time
+from app.config import PRESENCE_CHECK_START, PRESENCE_CHECK_END
 
 class UserDatabase:
     def __init__(self, filename="users.csv"):
@@ -29,20 +30,19 @@ class UserDatabase:
     def add_or_update_user(self, user_id, name, full_name, username):
         """Добавляет нового пользователя или обновляет его данные."""
         user_id = int(user_id)
-        current_time = datetime.datetime.now().strftime("%A, %Y-%m-%d %H:%M:%S")
 
         self.users[user_id] = {
             "name": name,
             "full_name": full_name,
             "username": username,
-            "last_checked": current_time
+            "last_checked": "None"
         }
         self._save_to_csv()
 
     def update_last_checked(self, user_id):
         """Обновляет время последнего отмечания пользователя."""
         if user_id in self.users:
-            self.users[user_id]["last_checked"] = datetime.datetime.now().strftime("%A, %Y-%m-%d %H:%M:%S")
+            self.users[user_id]["last_checked"] = datetime.now().strftime("%A, %Y-%m-%d %H:%M:%S")
             self._save_to_csv()
 
     def _save_to_csv(self):
@@ -59,17 +59,20 @@ class UserDatabase:
 
     def check_user_by_full_name(self, full_name):
         """Проверяет, был ли пользователь с таким ФИО обновлен сегодня с 7 до 9 часов."""
-        today = datetime.datetime.now().date()
-        start_time = datetime.datetime.combine(today, datetime.time(7, 0))
-        end_time = datetime.datetime.combine(today, datetime.time(20, 0))
+        today = datetime.now().date()
+        ps = PRESENCE_CHECK_START.split(':')
+        pe = PRESENCE_CHECK_END.split(':')
+        start_time = datetime.combine(today, time(int(ps[0]), int(ps[1])))
+        end_time = datetime.combine(today, time(int(pe[0]), int(pe[1])))
 
         # Ищем пользователей с таким ФИО
         for user_id, data in self.users.items():
             if data["name"] == full_name:
                 # Проверяем, было ли обновление сегодня и в указанном времени
-                last_checked = datetime.datetime.strptime(data["last_checked"], "%A, %Y-%m-%d %H:%M:%S")
-                if start_time <= last_checked <= end_time:
-                    return True
+                if data["last_checked"] != "None":
+                    last_checked = datetime.strptime(data["last_checked"], "%A, %Y-%m-%d %H:%M:%S")
+                    if start_time <= last_checked <= end_time:
+                        return True
         return False
 
 

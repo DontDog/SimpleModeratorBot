@@ -4,7 +4,7 @@ from aiogram import Router, types, F
 router = Router()
 
 
-@router.message(lambda message: message.document and message.caption == '/set')
+@router.message(lambda message: message.document and message.chat.type == "private" and message.caption == '/set')
 async def set_schedule(message: types.Message):
 
     file_id = message.document.file_id
