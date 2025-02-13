@@ -1,29 +1,33 @@
 from aiogram import Router, types
-from app import teachers_db, schedule_db, is_current_time_in_range
+from db import User, Schedule, State
+from app import GROUP_CHAT_ID, PRESENCE_CHECK_START, PRESENCE_CHECK_END
+from datetime import datetime
 
 router = Router()
 
 
-@router.message(lambda message: message.chat.type == "supergroup" and is_current_time_in_range()
+@router.message(lambda message: message.chat.type == "supergroup"
+                                and datetime.strptime(PRESENCE_CHECK_START,"%H:%M").time() <=
+                                datetime.now().time() <= datetime.strptime(PRESENCE_CHECK_END, "%H:%M").time()
+                                and message.chat and message.chat.id == GROUP_CHAT_ID
                                 and message.text and message.text.lower().startswith("тут"))
 async def reserve_room(message: types.Message):
     user_id = message.from_user.id
-
-    if not teachers_db.get_user(user_id):
+    u = User.get_by_telegram_id(user_id)
+    State.set('del', f'{message.message_id}')
+    if not u:
         await message.reply('Вы не зарегистрированы. Сначала зарегистрируйтесь, отправив ваше "!Фамилия", без кавычек.')
         return
 
-    teacher_name = teachers_db.get_user(user_id)["name"]
-    row = schedule_db.find_schedule(teacher_name)
-    if len(row) == 0:
+    s = Schedule.get_by_user(user_id)
+    if len(s) == 0:
         await message.reply(f"ОШИБКА! Возможно Вы отмечаетесь не по расписанию!")
         return
 
-    room = row[0]['room']
-    last_check = teachers_db.check_user_by_full_name(teacher_name)
-    if last_check:
-        await message.reply(f"Ваше присутствие уже отмечено в аудитории {room}.")
+    if u.last_checked and u.last_checked:
+        await message.reply(f"Ваше присутствие уже отмечено в аудитории {s[0].room}.")
         return
 
-    await message.reply(f"Ваше присутствие отмечено в аудитории {room}.")
-    teachers_db.update_last_checked(user_id)
+    m = await message.reply(f"Ваше присутствие отмечено в аудитории {s[0].room}.")
+    State.set('del', f'{m.message_id}')
+    User.update_last_checked(user_id)

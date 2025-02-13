@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
 GROUP_CHAT_ID = os.getenv("GROUP_CHAT_ID")
+PRESENCE_HELLO = os.getenv("PRESENCE_HELLO")
+PRESENCE_DELETE_MESSAGE = os.getenv("PRESENCE_DELETE_MESSAGE")
 PRESENCE_CHECK_START = os.getenv("PRESENCE_CHECK_START")
 PRESENCE_CHECK_END = os.getenv("PRESENCE_CHECK_END")
 PRESENCE_REPORT = (os.getenv("PRESENCE_REPORT").strip('[]')

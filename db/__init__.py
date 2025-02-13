@@ -1,2 +1,4 @@
-from .user_database import UserDatabase
-from .schedule_database import ScheduleDatabase
+from .database import *
+from .user import User
+from .schedule import Schedule
+from .state import State
